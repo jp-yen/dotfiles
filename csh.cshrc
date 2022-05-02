@@ -22,10 +22,15 @@ if ( $?prompt ) then
 		mkdir $SCREENDIR && chmod 700 $SCREENDIR
 	endif
 
+	( which \htop >& /dev/null ) && alias top `which \htop`
 	setenv PAGER more
 	( which \less >& /dev/null ) && setenv PAGER `which \less`
 	setenv LESS "-ReFXsc"
-	setenv LESSOPEN	'| /bin/lesspipe %s'
+
+	( which lesspipe >& /dev/null ) && set lesspipe = `which lesspipe` || \
+	( which lesspipe.sh >& /dev/null ) && set lesspipe = `which lesspipe.sh`
+	setenv LESSOPEN '| '"$lesspipe"' %s'
+	unset lessopen
 
 	set esc=`printf "\e"`
 	( which \tput >& /dev/null ) && set TPUT = `which \tput`
@@ -111,6 +116,18 @@ if ( $?prompt ) then
 	endif
 	unset esc
 	unset clr
+
+	if ( ! -e ~/.ssh-agent ) then
+		( which \ssh-agent  >& /dev/null ) &&   `which ssh-agent` > ~/.ssh-agent
+	endif
+	source ~/.ssh-agent
+
+	if ( "$SSH_AGENT_PID" == "" || ! { kill -0 "$SSH_AGENT_PID" } ) then
+		( which \ssh-agent  >& /dev/null ) &&   `which ssh-agent` > ~/.ssh-agent
+		source ~/.ssh-agent
+	endif
+
+	ssh-add -l >& /dev/null || ssh-add
 
 	( which \fortune >& /dev/null ) && fortune -a
 endif
