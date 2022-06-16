@@ -125,7 +125,7 @@ set statusline+=%h
 set statusline+=%=
 
 "現在行数/全行数
-set statusline+=[L%l/%L]
+set statusline+=[%c\ %l/%L]
 
 "文字コード
 "set statusline+=[ASCII:\%06.6b][HEX:\%04.4B]
@@ -142,13 +142,28 @@ set statusline+=%y
 
 " 色テーマを指定
 syntax enable
-" どれか入っていないかな？
+" どれか入っていないかな？ ない場合は .vim/colors/ へ入れる
+
+" https://github.com/vim/vim/blob/master/runtime/colors/evening.vim :-P
 colorscheme evening
+
+" https://github.com/rodnaph/vim-color-schemes/blob/master/colors/koehler.vim
 colorscheme koehler
+
+" https://www.vim.org/scripts/script.php?script_id=2465
 colorscheme wombat256mod
+
+" https://romainl.github.io/Apprentice/
 colorscheme apprentice
+
+" https://github.com/karoliskoncevicius/moonshine-vim
 colorscheme moonshine
+
+" https://github.com/Haron-Prime/Antares
 colorscheme antares
+
+" 自分でカラースキームを選びたい場合は
+" https://colorswat.ch/vim/?welcome=1
 
 "文字コードや改行コードが違っているとファイルを壊すので注意
 "vim: set ts=4 fenc=utf-8 ff=unix ft=vimrc : モードライン
