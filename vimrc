@@ -151,15 +151,19 @@ colorscheme evening
 colorscheme koehler
 
 " https://www.vim.org/scripts/script.php?script_id=2465
+" wget -O wombat256mod.vim 'https://www.vim.org/scripts/download_script.php?src_id=13400'
 colorscheme wombat256mod
 
 " https://romainl.github.io/Apprentice/
+" wget https://raw.githubusercontent.com/romainl/Apprentice/master/colors/apprentice.vim
 colorscheme apprentice
 
 " https://github.com/karoliskoncevicius/moonshine-vim
+" wget https://raw.githubusercontent.com/karoliskoncevicius/moonshine-vim/master/colors/moonshine.vim
 colorscheme moonshine
 
 " https://github.com/Haron-Prime/Antares
+" wget https://raw.githubusercontent.com/Haron-Prime/Antares/master/colors/antares.vim
 colorscheme antares
 
 " 自分でカラースキームを選びたい場合は
