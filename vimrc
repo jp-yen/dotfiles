@@ -65,6 +65,9 @@ endif
 "" 文字コードを指定して開き直す
 "" :e ++enc=shift_jis
 
+"" ウィンドウをクリックしたときに visual モードになるのを防ぐ
+set mouse-=a
+
 filetype on
 if has("audocmd")
     autocmd FileType c,cpp,perl setlocal cindent
