@@ -118,12 +118,12 @@ if ( $?prompt ) then
 	unset clr
 
 	if ( ! -e ~/.ssh-agent ) then
-		( which \ssh-agent  >& /dev/null ) &&   `which ssh-agent` > ~/.ssh-agent
+		( which \ssh-agent  >& /dev/null ) &&   `which ssh-agent` -c > ~/.ssh-agent
 	endif
 	source ~/.ssh-agent
 
 	if ( "$SSH_AGENT_PID" == "" || ! { kill -0 "$SSH_AGENT_PID" } ) then
-		( which \ssh-agent  >& /dev/null ) &&   `which ssh-agent` > ~/.ssh-agent
+		( which \ssh-agent  >& /dev/null ) &&   `which ssh-agent` -c > ~/.ssh-agent
 		source ~/.ssh-agent
 	endif
 
