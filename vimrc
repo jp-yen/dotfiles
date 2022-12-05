@@ -150,7 +150,7 @@ syntax enable
 " https://github.com/vim/vim/blob/master/runtime/colors/evening.vim :-P
 colorscheme evening
 
-" https://github.com/rodnaph/vim-color-schemes/blob/master/colors/koehler.vim
+" https://raw.githubusercontent.com/rodnaph/vim-color-schemes/master/colors/koehler.vim
 colorscheme koehler
 
 " https://www.vim.org/scripts/script.php?script_id=2465
