@@ -1,0 +1,51 @@
+#!/bin/sh
+# 日本語ロケールが入っていること
+# dpkg-reconfigure locales
+
+apt update
+apt full-upgrade
+apt purge
+apt autoremove
+apt -y install git locate tcsh vim screen sudo
+apt -y remove nano
+
+# - optional
+apt -y install manpages manpages-dev manpages-ja manpages-ja-dev
+apt -y install syslog-ng sysstat zip
+
+# インストール済みの一覧
+# apt list --installed
+
+chsh -s /usr/bin/tcsh
+git clone https://github.com/jp-yen/dotfiles.git
+install dotfiles/csh.cshrc /etc/csh.cshrc
+install dotfiles/screenrc /etc/screenrc
+install dotfiles/vimrc /etc/vim/vimrc
+
+VIM_COLORS=/usr/share/vim/vim82/colors
+( cd $VIM_COLORS ; wget -N -O wombat256mod.vim 'https://www.vim.org/scripts/download_script.php?src_id=13400' )
+( cd $VIM_COLORS ; wget -N https://raw.githubusercontent.com/romainl/Apprentice/master/colors/apprentice.vim )
+( cd $VIM_COLORS ; wget -N https://raw.githubusercontent.com/karoliskoncevicius/moonshine-vim/master/colors/moonshine.vim )
+( cd $VIM_COLORS ; wget -N https://raw.githubusercontent.com/Haron-Prime/Antares/master/colors/antares.vim )
+
+exit
+
+# CD インストール net-inst を使うと /etc/apt/sources.list が自動的に更新され便利
+# (Cinnamon), SSH, 標準システムユーティリティ
+#
+# /etc/apt/sources.list の例
+# deb cdrom:[Debian GNU/Linux 11.1.0 _Bullseye_ - Official amd64 DVD Binary-1 20211009-10:08]/ bullseye contrib main
+
+deb http://ftp.kddilabs.jp/pub/debian/ bullseye main
+deb-src http://ftp.kddilabs.jp/pub/debian/ bullseye main
+
+deb http://security.debian.org/debian-security bullseye-security main contrib
+deb-src http://security.debian.org/debian-security bullseye-security main contrib
+
+# bullseye-updates, to get updates before a point release is made;
+# see https://www.debian.org/doc/manuals/debian-reference/ch02.en.html#_updates_and_backports
+
+deb http://deb.debian.org/debian/ bullseye main contrib non-free
+deb http://security.debian.org/debian-security bullseye-security main contrib
+deb http://deb.debian.org/debian/ bullseye-updates main contrib non-free
+deb http://deb.debian.org/debian/ bullseye-backports main contrib non-free
