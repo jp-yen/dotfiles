@@ -34,18 +34,23 @@ exit
 # (Cinnamon), SSH, 標準システムユーティリティ
 #
 # /etc/apt/sources.list の例
-# deb cdrom:[Debian GNU/Linux 11.1.0 _Bullseye_ - Official amd64 DVD Binary-1 20211009-10:08]/ bullseye contrib main
+# deb cdrom:[Debian GNU/Linux 11.6.0 _Bullseye_ - Official amd64 NETINST 20221217-10:42]/ bullseye main
+deb http://ftp.riken.jp/Linux/debian/debian/ bullseye main
+deb-src http://ftp.riken.jp/Linux/debian/debian/ bullseye main
 
-deb http://ftp.kddilabs.jp/pub/debian/ bullseye main
-deb-src http://ftp.kddilabs.jp/pub/debian/ bullseye main
-
-deb http://security.debian.org/debian-security bullseye-security main contrib
-deb-src http://security.debian.org/debian-security bullseye-security main contrib
+deb http://security.debian.org/debian-security bullseye-security main
+deb-src http://security.debian.org/debian-security bullseye-security main
 
 # bullseye-updates, to get updates before a point release is made;
 # see https://www.debian.org/doc/manuals/debian-reference/ch02.en.html#_updates_and_backports
+deb http://ftp.riken.jp/Linux/debian/debian/ bullseye-updates main
+deb-src http://ftp.riken.jp/Linux/debian/debian/ bullseye-updates main
+
+# This system was installed using small removable media
+# (e.g. netinst, live or single CD). The matching "deb cdrom"
+# entries were disabled at the end of the installation process.
+# For information about how to configure apt package sources,
+# see the sources.list(5) manual.
 
 deb http://deb.debian.org/debian/ bullseye main contrib non-free
-deb http://security.debian.org/debian-security bullseye-security main contrib
-deb http://deb.debian.org/debian/ bullseye-updates main contrib non-free
 deb http://deb.debian.org/debian/ bullseye-backports main contrib non-free
