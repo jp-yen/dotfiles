@@ -4,17 +4,20 @@
 
 apt update
 apt full-upgrade
-apt purge
 apt autoremove
+apt purge
 apt -y install git locate tcsh vim screen sudo
 apt -y remove nano
 
 # - optional
+apt -y install sharutils gcc make
 apt -y install manpages manpages-dev manpages-ja manpages-ja-dev
 apt -y install syslog-ng sysstat zip
 
 # インストール済みの一覧
 # apt list --installed
+# 設定ファイルごとアンインストール
+# apt --purge remove <foo>
 
 chsh -s /usr/bin/tcsh
 git clone https://github.com/jp-yen/dotfiles.git
