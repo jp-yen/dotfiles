@@ -17,6 +17,9 @@ apt -y install sharutils gcc make
 apt -y install manpages manpages-dev manpages-ja manpages-ja-dev
 apt -y install syslog-ng sysstat zip
 
+# Fedora の場合の日本語ロケール追加
+# dnf install glibc-langpack-ja
+
 # インストール済みの一覧
 # apt list --installed
 # 設定ファイルごとアンインストール
