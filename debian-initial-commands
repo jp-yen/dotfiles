@@ -32,7 +32,7 @@ install dotfiles/screenrc /etc/screenrc
 install dotfiles/vimrc /etc/vim/vimrc
 
 VIM_COLORS=/usr/share/vim/vim82/colors
-( cd $VIM_COLORS ; wget -N -O wombat256mod.vim 'https://www.vim.org/scripts/download_script.php?src_id=13400' )
+( cd $VIM_COLORS ; wget -N https://raw.githubusercontent.com/michalbachowski/vim-wombat256mod/master/colors/wombat256mod.vim )
 ( cd $VIM_COLORS ; wget -N https://raw.githubusercontent.com/romainl/Apprentice/master/colors/apprentice.vim )
 ( cd $VIM_COLORS ; wget -N https://raw.githubusercontent.com/karoliskoncevicius/moonshine-vim/master/colors/moonshine.vim )
 ( cd $VIM_COLORS ; wget -N https://raw.githubusercontent.com/Haron-Prime/Antares/master/colors/antares.vim )
