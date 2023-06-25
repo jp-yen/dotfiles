@@ -2,6 +2,9 @@
 # 日本語ロケールが入っていること
 # dpkg-reconfigure locales
 
+# sources.list のパッケージに non-free contrib を追加
+sed -i.orig -e '/^deb.*debian/{s/$/ non-free contrib/}' /etc/apt/sources.list
+
 apt update
 apt full-upgrade
 apt autoremove
