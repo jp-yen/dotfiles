@@ -66,7 +66,10 @@ endif
 "" :e ++enc=shift_jis
 
 "" ウィンドウをクリックしたときに visual モードになるのを防ぐ
+"" ウィンドウをクリックしたときにカーソルを移動しない
 set mouse-=a
+set mouse=n
+map <LeftMouse> <Nop>
 
 filetype on
 if has("audocmd")
