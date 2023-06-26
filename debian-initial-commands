@@ -18,7 +18,9 @@ apt -y remove nano
 # - optional
 apt -y install sharutils gcc make
 apt -y install manpages manpages-dev manpages-ja manpages-ja-dev
-apt -y install syslog-ng sysstat zip
+apt -y install syslog-ng sysstat zip bind9-dnsutils sharutils
+# bind9-dnsutils - dig, nslookup
+# sharutils - shar, uuencode
 
 # Fedora の場合の日本語ロケール追加
 # dnf install glibc-langpack-ja
