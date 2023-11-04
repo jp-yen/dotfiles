@@ -237,6 +237,8 @@ defbce on
 msgwait 3
 msgminwait 2
 
+slowpaste 2
+
 # display status
 # hardstatus alwayslastline "%{= cd} %-w%{= wk} %n %t* %{-}%+w %= LoadAVG [%l] "
 
