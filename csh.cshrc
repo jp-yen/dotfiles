@@ -15,7 +15,7 @@ if ( $?prompt ) then
 	alias	c	clear
 	alias	JP	setenv LANG ja_JP.utf8
 	alias	C	unsetenv LANG LC_ALL
-	( which \screen  >& /dev/null ) &&	alias	screen	`which \screen` -U
+	( which \screen  >& /dev/null ) &&	alias	screen	`which \screen` -U -D -RR
 	# cygwin や WSL など、/var/run/screen 問題の回避
 	setenv SCREENDIR $HOME/.screen
 	if ( ! -d $SCREENDIR ) then
