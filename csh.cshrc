@@ -32,7 +32,7 @@ if ( $?prompt ) then
 	setenv LESSOPEN '| '"$lesspipe"' %s'
 	unset lessopen
 
-	set esc=`printf "\e"`
+	set esc=`printf "\033"`
 	( which \tput >& /dev/null ) && set TPUT = `which \tput`
 	if ( $?TPUT ) then
 		set clr = "`$TPUT sgr0`"
@@ -62,7 +62,7 @@ if ( $?prompt ) then
 		endif
 		unset TPUT
 	else
-		set clr = "`printf '\e[0m'`"
+		set clr = "`printf '\033[0m'`"
 
 		setenv  LESS_TERMCAP_md "$esc"'[1;44m'		# begin bold
 		setenv  LESS_TERMCAP_mb "$esc"'[1;5;31m'	# begin blinking
