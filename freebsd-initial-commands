@@ -1,0 +1,34 @@
+#!/bin/sh
+
+export ASSUME_ALWAYS_YES=yes
+pkg
+
+pkg help install
+
+echo 'FreeBSD: { url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest" }' > /usr/local/etc/pkg/repos/FreeBSD.conf
+pkg update -f
+
+pkg install -y git
+git clone -o freebsd --depth 1 --no-single-branch https://git.freebsd.org/src.git /usr/src
+cd /usr/src
+git checkout stable/14
+git clone -o freebsd --depth 1 https://git.freebsd.org/ports.git /usr/ports
+git clone -o freebsd --depth 1 https://git.FreeBSD.org/doc.git /usr/doc
+
+pkg install portupgrade
+portinstall --batch wget curl vim screen50
+portupgrade -a --batch
+
+chsh -s /usr/bin/tcsh
+git clone https://github.com/jp-yen/dotfiles.git
+install dotfiles/csh.cshrc /etc/csh.cshrc
+install dotfiles/screenrc /usr/local/etc/screenrc
+install dotfiles/vimrc /usr/local/etc/vim/vimrc
+
+VIM_COLORS=/usr/local/share/vim/vim91/colors/
+( cd $VIM_COLORS && wget -N https://raw.githubusercontent.com/michalbachowski/vim-wombat256mod/master/colors/wombat256mod.vim )
+( cd $VIM_COLORS && wget -N https://raw.githubusercontent.com/romainl/Apprentice/master/colors/apprentice.vim )
+( cd $VIM_COLORS && wget -N https://raw.githubusercontent.com/karoliskoncevicius/moonshine-vim/master/colors/moonshine.vim )
+( cd $VIM_COLORS && wget -N https://raw.githubusercontent.com/Haron-Prime/Antares/master/colors/antares.vim )
+
+/etc/periodic/weekly/310.locate
