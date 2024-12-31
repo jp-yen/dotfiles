@@ -19,7 +19,7 @@ pkg install portupgrade
 portinstall --batch wget curl vim screen50
 portupgrade -a --batch
 
-chsh -s /usr/bin/tcsh
+chsh -s /bin/tcsh
 git clone https://github.com/jp-yen/dotfiles.git
 install dotfiles/csh.cshrc /etc/csh.cshrc
 install dotfiles/screenrc /usr/local/etc/screenrc
