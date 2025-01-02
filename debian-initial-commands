@@ -42,6 +42,23 @@ VIM_COLORS=/usr/share/vim/vim90/colors
 ( cd $VIM_COLORS && wget -N https://raw.githubusercontent.com/karoliskoncevicius/moonshine-vim/master/colors/moonshine.vim )
 ( cd $VIM_COLORS && wget -N https://raw.githubusercontent.com/Haron-Prime/Antares/master/colors/antares.vim )
 
+# for Proxmox
+if dmesg | grep -i proxmox > /dev/null ; then
+  apt install spice-vdagent
+  systemctl start spice-vdagent
+  systemctl enable spice-vdagent
+  systemctl status spice-vdagent
+  mkdir -p /etc/systemd/system/spice-vdagent.service.d/
+  cat <<___EOF___> /etc/systemd/system/spice-vdagent.service.d/override.conf
+[Service]
+ExecStart=
+ExecStart=/usr/sbin/spice-vdagentd
+___EOF___
+  systemctl daemon-reload
+  systemctl enable spice-vdagent
+fi
+
+
 exit
 
 # CD インストール net-inst を使うと /etc/apt/sources.list が自動的に更新され便利
