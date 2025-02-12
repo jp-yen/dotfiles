@@ -65,17 +65,17 @@ exit
 # (Cinnamon), SSH, 標準システムユーティリティ
 #
 # /etc/apt/sources.list の例
-# deb cdrom:[Debian GNU/Linux 11.6.0 _Bullseye_ - Official amd64 NETINST 20221217-10:42]/ bullseye main
-deb http://ftp.riken.jp/Linux/debian/debian/ bullseye main
-deb-src http://ftp.riken.jp/Linux/debian/debian/ bullseye main
+#deb cdrom:[Debian GNU/Linux 12.9.0 _Bookworm_ - Official amd64 NETINST with firmware 20250111-10:54]/ bookworm contrib main non-free-firmware
+deb http://ftp.jaist.ac.jp/debian/ bookworm main non-free-firmware non-free contrib
+deb-src http://ftp.jaist.ac.jp/debian/ bookworm main non-free-firmware non-free contrib
 
-deb http://security.debian.org/debian-security bullseye-security main
-deb-src http://security.debian.org/debian-security bullseye-security main
+deb http://security.debian.org/debian-security bookworm-security main
+deb-src http://security.debian.org/debian-security bookworm-security main
 
-# bullseye-updates, to get updates before a point release is made;
+# bookworm-updates, to get updates before a point release is made;
 # see https://www.debian.org/doc/manuals/debian-reference/ch02.en.html#_updates_and_backports
-deb http://ftp.riken.jp/Linux/debian/debian/ bullseye-updates main
-deb-src http://ftp.riken.jp/Linux/debian/debian/ bullseye-updates main
+deb http://ftp.jaist.ac.jp/debian/ bookworm-updates main non-free-firmware non-free contrib
+deb-src http://ftp.jaist.ac.jp/debian/ bookworm-updates main non-free-firmware non-free contrib
 
 # This system was installed using small removable media
 # (e.g. netinst, live or single CD). The matching "deb cdrom"
@@ -83,5 +83,5 @@ deb-src http://ftp.riken.jp/Linux/debian/debian/ bullseye-updates main
 # For information about how to configure apt package sources,
 # see the sources.list(5) manual.
 
-deb http://deb.debian.org/debian/ bullseye main contrib non-free
-deb http://deb.debian.org/debian/ bullseye-backports main contrib non-free
+deb http://deb.debian.org/debian/ bookworm main contrib non-free contrib
+deb http://deb.debian.org/debian/ bookworm-backports main contrib non-free contrib
