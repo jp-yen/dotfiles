@@ -23,14 +23,17 @@ git clone -o freebsd --depth 1 https://git.freebsd.org/ports.git /usr/ports
 git clone -o freebsd --depth 1 https://git.FreeBSD.org/doc.git /usr/doc
 
 pkg install portupgrade
-portinstall --batch wget curl vim screen50
+pkg install neovim wget curl screen50
+
 portupgrade -a --batch
 
 chsh -s /bin/tcsh
 git clone https://github.com/jp-yen/dotfiles.git
 install dotfiles/csh.cshrc /etc/csh.cshrc
-install -d dotfiles/screenrc /usr/local/etc/screenrc
-install -d dotfiles/vimrc /usr/local/etc/vim/vimrc
+mkdir -p /usr/local/etc/
+install dotfiles/screenrc /usr/local/etc/screenrc
+mkdir -p /usr/local/etc/vim/
+install dotfiles/vimrc /usr/local/etc/vim/vimrc
 
 VIM_COLORS=/usr/local/share/vim/vim91/colors/
 ( cd $VIM_COLORS && wget -N https://raw.githubusercontent.com/michalbachowski/vim-wombat256mod/master/colors/wombat256mod.vim )
