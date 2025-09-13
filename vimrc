@@ -36,7 +36,6 @@ if has('iconv')
       set fileencodings-=euc-jp
       set fileencodings-=euc-jisx0213
       set fileencodings-=eucjp-ms
-      let &encoding = s:enc_euc
       let &fileencoding = s:enc_euc
     else
       let &fileencodings = &fileencodings .','. s:enc_euc
@@ -67,9 +66,13 @@ endif
 
 "" ウィンドウをクリックしたときに visual モードになるのを防ぐ
 "" ウィンドウをクリックしたときにカーソルを移動しない
-set mouse-=a
-set mouse=n
+set mouse=
 map <LeftMouse> <Nop>
+
+" set mouse= が反映されないので autocmd で設定する
+" autocmd に登録されているか確認するには以下のコマンドを実行
+" :autocmd VimEnter *
+autocmd VimEnter * set mouse=
 
 filetype on
 if has("audocmd")
