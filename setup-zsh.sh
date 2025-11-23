@@ -193,27 +193,14 @@ setup_fzf_paths() {
 
 # システム設定ファイル作成関数
 create_system_config() {
-    # ディストリビューションごとの設定パスを定義
-    CONFIG_DIR_alpine="/etc/zsh"
-    OMZ_CONFIG_alpine="/etc/zsh/zshrc"
-    DEFAULTS_CONFIG_alpine=""
+    # 設定パスを定義
+    CONFIG_DIR="/etc/zsh/zshrc.d"
+    OMZ_CONFIG="$CONFIG_DIR/00-omz-system.zsh"
+    DEFAULTS_CONFIG="$CONFIG_DIR/01-defaults.zsh"
     
-    CONFIG_DIR_redhat="/etc/zsh/zshrc.d"
-    OMZ_CONFIG_redhat="/etc/zsh/zshrc.d/00-omz-system.zsh"
-    DEFAULTS_CONFIG_redhat="/etc/zsh/zshrc.d/01-defaults.zsh"
-    
-    # ディストリビューション判定
-    distro_key="$DISTRO_FAMILY"
-    [ "$DISTRO_FAMILY" != "alpine" ] && distro_key="redhat"
-    
-    # 間接変数展開
-    config_dir_var="CONFIG_DIR_${distro_key}"
-    omz_config_var="OMZ_CONFIG_${distro_key}"
-    defaults_config_var="DEFAULTS_CONFIG_${distro_key}"
-    
-    config_dir="${!config_dir_var}"
-    omz_config="${!omz_config_var}"
-    defaults_config="${!defaults_config_var}"
+    config_dir="$CONFIG_DIR"
+    omz_config="$OMZ_CONFIG"
+    defaults_config="$DEFAULTS_CONFIG"
 
     # Oh My Zsh完全初期化を生成する関数
     generate_omz_config() {
@@ -249,6 +236,9 @@ plugins=(
     sudo
     history
     colored-man-pages
+    docker
+    docker-compose
+    kubectl
 OMZ_CONFIG_EOF
         # ディストリビューション固有のプラグインを追加
         [ -n "$DISTRO_PLUGIN" ] && echo "    $DISTRO_PLUGIN"
@@ -370,30 +360,21 @@ fi
 DEFAULTS_EOF2
     }
 
-    if [ "$DISTRO_FAMILY" = "alpine" ]; then
-        # Alpine用の設定（単一ファイル）
-        mkdir -p "$config_dir"
-        
-        generate_omz_config > "$omz_config"
-        echo "" >> "$omz_config"
-        generate_defaults_config >> "$omz_config"
-        
-        chmod 644 "$omz_config"
-    else
-        # Fedora/Debian共通の設定（/etc/zsh/zshrc.d/ を使用）
-        mkdir -p "$config_dir"
-        
-        generate_omz_config > "$omz_config"
-        generate_defaults_config > "$defaults_config"
-        
-        chmod 644 "$config_dir"/*.zsh
+    # 設定生成処理（/etc/zsh/zshrc.d/ を使用）
+    mkdir -p "$config_dir"
+    
+    generate_omz_config > "$omz_config"
+    generate_defaults_config > "$defaults_config"
+    
+    chmod 644 "$config_dir"/*.zsh
 
-        # ディストリビューション固有の設定を実行
-        if [ "$PKG_MANAGER" = "dnf" ]; then
-            configure_fedora_zshrc
-        elif [ "$PKG_MANAGER" = "apt" ]; then
-            configure_debian_zshrc
-        fi
+    # ディストリビューション固有の設定を実行
+    if [ "$PKG_MANAGER" = "dnf" ]; then
+        configure_fedora_zshrc
+    elif [ "$PKG_MANAGER" = "apt" ]; then
+        configure_zshrc_loader
+    elif [ "$PKG_MANAGER" = "apk" ]; then
+        configure_zshrc_loader
     fi
 }
 
@@ -403,9 +384,9 @@ configure_fedora_zshrc() {
     # 追加の設定があればここに記述
 }
 
-# Debian固有の設定
-configure_debian_zshrc() {
-    echo "Debian固有の設定を適用しています..."
+# /etc/zsh/zshrc ローダーの設定（Debian/Alpine用）
+configure_zshrc_loader() {
+    echo "/etc/zsh/zshrc ローダーを設定しています..."
     # /etc/zsh/zshrc の設定
     # 既存の設定があるか確認
     if [ -f /etc/zsh/zshrc ] && grep -q "/etc/zsh/zshrc.d" /etc/zsh/zshrc; then
@@ -510,6 +491,10 @@ fi
 [[ -f ~/.zsh/functions.zsh ]] && source ~/.zsh/functions.zsh
 ZSHRC_EOF
     echo "✓ .zshrc を作成しました"
+    echo ""
+else
+    echo "警告: ~/.zshrc は既に存在するため、作成をスキップしました"
+    echo "      既存の設定は変更されていません"
     echo ""
 fi
 
@@ -649,8 +634,11 @@ main() {
     echo "  システムセットアップ完了！"
     echo "=========================================="
     echo ""
-    echo "各ユーザーで以下を実行してください:"
+    echo "利用したいユーザーは、以下を実行してください:"
     echo "  setup-my-zsh"
+    echo "  ※ zshを起動せずに実行してください"
+    echo ""
+    echo "その後、zshを起動して初期設定を行ってください:"
     echo "  exec zsh"
     echo ""
 }

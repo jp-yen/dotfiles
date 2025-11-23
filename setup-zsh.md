@@ -2,7 +2,7 @@
 
 ## 前提条件
 
-*   **Alpine Linux**: 事前に `/etc/apk/repositories` の community リポジトリを有効化してください。
+*   **Alpine Linux**: 事前に `/etc/apk/repositories` の community リポジトリを有効化し、`apk add bash sudo` を実行してください。
 *   **フォント**: `Monaspace Xenon` などの Nerd Font 対応フォント推奨。
 
 ## インストールとセットアップ
@@ -12,12 +12,12 @@
 **必ず root 権限で実行してください。**
 
 ```bash
-sudo ./setup-zsh.sh
+sudo bash ./setup-zsh.sh
 ```
 
 ### 2. ユーザーごとのセットアップ（各ユーザー）
 各ユーザーで以下のコマンドを実行し、個人設定（`.zshrc` など）を作成します。
-**現在のシェル（Bashなど）のまま実行してください。** `zsh` を起動してから実行すると、意図しない初期設定ウィザードが開始される可能性があります。
+**zsh を起動せずに実行してください。** `zsh` を起動してから実行すると、意図しない初期設定ウィザードが開始される可能性があります。
 
 ```bash
 setup-my-zsh
@@ -76,19 +76,12 @@ rm -rf ~/.zsh/cache ~/.zsh/functions.zsh ~/.zshrc ~/.p10k.zsh ~/.p10k-post.zsh ~
 ```
 
 ### システム設定
-**Fedora/Debian系**
 ```
 /etc/zsh/
 ├── zshrc.d/                                # 設定ファイル群
 │   ├── 00-omz-system.zsh                   # Oh My Zsh設定
 │   └── 01-defaults.zsh                     # デフォルト設定・エイリアス
 └── zshrc                                   # ローダー
-```
-
-**Alpine系**
-```
-/etc/zsh/
-└── zshrc                                   # 単一設定ファイル
 ```
 
 ### ユーザーディレクトリ
