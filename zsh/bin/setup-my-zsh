@@ -1,0 +1,147 @@
+#!/bin/bash
+
+# ユーザー用Oh My Zshセットアップヘルパー
+
+USER_HOME="$HOME"
+ZSH_DIR="$USER_HOME/.zsh"
+ZSH_CACHE_DIR="$USER_HOME/.zsh/cache"
+SCREEN_DIR="$USER_HOME/.screen"
+
+# Oh My Zshがインストールされているか確認
+if [ ! -f /usr/share/oh-my-zsh/oh-my-zsh.sh ]; then
+    echo "エラー: Oh My Zshがシステムにインストールされていません"
+    echo "管理者にシステムセットアップスクリプトを実行してもらってください"
+    exit 1
+fi
+
+echo "=========================================="
+echo "  個人用Oh My Zsh設定"
+echo "=========================================="
+echo ""
+
+# .zshディレクトリとキャッシュの作成
+echo "~/.zsh ディレクトリ構造を作成しています..."
+mkdir -p "$ZSH_DIR"
+mkdir -p "$ZSH_CACHE_DIR"
+
+echo "~/.screen ディレクトリを作成しています..."
+mkdir -p "$SCREEN_DIR"
+chmod 700 "$SCREEN_DIR"
+
+# 既存のzshファイルを移動
+echo "既存のzshファイルを ~/.zsh/ へ移動しています..."
+
+# .zsh_historyの移動
+if [ -f "$USER_HOME/.zsh_history" ]; then
+    mv -f "$USER_HOME/.zsh_history" "$ZSH_DIR/history" 2>/dev/null && \
+        echo "  ✓ .zsh_history を ~/.zsh/history へ移動しました" || true
+fi
+
+# .zcompdumpファイルの移動
+for zcomp in "$USER_HOME"/.zcompdump*; do
+    if [ -f "$zcomp" ]; then
+        mv -f "$zcomp" "$ZSH_CACHE_DIR/" 2>/dev/null && \
+            echo "  ✓ $(basename "$zcomp") を移動しました" || true
+    fi
+done
+
+# p10k instant promptキャッシュの移動
+if [ -d "$USER_HOME/.cache" ]; then
+    for cache_file in "$USER_HOME/.cache"/p10k-*; do
+        if [ -f "$cache_file" ]; then
+            mv -f "$cache_file" "$ZSH_CACHE_DIR/" 2>/dev/null && \
+                echo "  ✓ $(basename "$cache_file") を移動しました" || true
+        fi
+    done
+fi
+
+echo ""
+
+# .zshrcの作成
+if [ ! -f "$USER_HOME/.zshrc" ]; then
+    cat > "$USER_HOME/.zshrc" << 'ZSHRC_EOF'
+# Powerlevel10kのインスタントプロンプトを有効化。~/.zshrcの先頭付近に配置する必要があります。
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.zsh/cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.zsh/cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# プロンプトをカスタマイズするには、p10k configure を実行するか ~/.p10k.zsh を編集してください。
+if [[ -f ~/.p10k.zsh ]]; then
+  source ~/.p10k.zsh
+  # カスタム設定（.p10k.zsh読み込み後）
+  [[ ! -f ~/.p10k-post.zsh ]] || source ~/.p10k-post.zsh
+fi
+
+# カスタム関数の読み込み
+[[ -f ~/.zsh/functions.zsh ]] && source ~/.zsh/functions.zsh
+
+# SSH Agent 初期化
+if [ -f /etc/ssh-agent-init.sh ]; then
+    . /etc/ssh-agent-init.sh
+fi
+ZSHRC_EOF
+    echo "✓ .zshrc を作成しました"
+    echo ""
+else
+    echo "警告: ~/.zshrc は既に存在するため、作成をスキップしました"
+    echo "      既存の設定は変更されていません"
+    echo ""
+fi
+
+# キャッシュクリア関数の追加
+cat > "$ZSH_DIR/functions.zsh" << 'FUNC_EOF'
+# Zshキャッシュクリア関数
+clean-zsh-cache() {
+    rm -rf ~/.zsh/cache/*
+    rm -f ~/.zcompdump*
+    echo "✓ Zshキャッシュをクリアしました"
+    echo "  変更を反映するには 'exec zsh' を実行してください"
+}
+FUNC_EOF
+
+# .p10k-post.zsh作成（.p10k.zshの後に自動読み込み）
+cat > "$USER_HOME/.p10k-post.zsh" << 'P10K_POST_EOF'
+# .p10k-post.zsh
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(os_icon host dir vcs newline prompt_char)
+
+if [[ $UID == 0 ]]; then
+  typeset -g POWERLEVEL9K_HOST_FOREGROUND=1
+  typeset -g POWERLEVEL9K_HOST_BACKGROUND=0
+  typeset -g POWERLEVEL9K_HOST_TEMPLATE='%n🚨%m'
+  typeset -g POWERLEVEL9K_HOST_VISUAL_IDENTIFIER_EXPANSION='🚨'
+else
+  typeset -g POWERLEVEL9K_HOST_FOREGROUND=51
+  typeset -g POWERLEVEL9K_HOST_BACKGROUND=30
+  typeset -g POWERLEVEL9K_HOST_TEMPLATE='%n 💻 %m'
+  typeset -g POWERLEVEL9K_HOST_VISUAL_IDENTIFIER_EXPANSION='🐳'
+fi
+
+P10K_POST_EOF
+
+echo "✓ .p10k-post.zsh を作成しました（カスタム設定）"
+echo ""
+
+echo "======================================"
+echo "  セットアップが完了しました！"
+echo "======================================"
+echo ""
+
+if [ ! -f "$USER_HOME/.p10k.zsh" ]; then
+    echo "次のステップ:"
+    echo "1. 'zsh' でzshを起動"
+    echo "2. 初回起動時にPowerlevel10k設定ウィザードが自動的に開始されます"
+    echo "3. 設定後は以下を実行してカスタム設定を適用:"
+    echo "   source ~/.p10k-post.zsh && p10k reload"
+    echo "   または 'exec zsh' で起動"
+else
+    echo "zshを起動してください:"
+    echo "  exec zsh"
+fi
+
+echo "デフォルトシェルをzshに変更する場合:"
+echo "  chsh -s \$(which zsh)"
+echo ""
+echo "便利なコマンド:"
+echo "  p10k configure  - プロンプトを再設定"
+echo "  clean-zsh-cache - キャッシュをクリア"
+echo ""

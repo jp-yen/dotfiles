@@ -8,6 +8,12 @@ SSH_AGENT_SCRIPT='#!/bin/sh
 AGENT_SH="$HOME/.ssh-agent.sh"
 AGENT_CSH="$HOME/.ssh-agent.csh"
 
+# 二重実行防止
+if [ -n "$SSH_AGENT_INIT_DONE" ]; then
+    return
+fi
+export SSH_AGENT_INIT_DONE=1
+
 # sh形式の環境変数を読み込む
 if [ -f "$AGENT_SH" ]; then
     . "$AGENT_SH" >/dev/null 2>&1
@@ -145,13 +151,17 @@ ZSH_EOF
     fi
 
     # .profile に追加（bashもzshもない場合のフォールバック）
+    # sh/ash ユーザーのために常に設定するが、bash/zsh から読み込まれた場合は二重実行を防ぐためにスキップする
     if [ -f "$HOME/.profile" ]; then
         if ! grep -q ".ssh-agent-init.sh" "$HOME/.profile" 2>/dev/null; then
             cat >> "$HOME/.profile" << 'PROFILE_EOF'
 
 # SSH Agent Initialization
-if [ -f "$HOME/.ssh-agent-init.sh" ]; then
-    . "$HOME/.ssh-agent-init.sh"
+# Skip if running in bash or zsh (handled by .bashrc/.zshrc)
+if [ -z "$BASH_VERSION" ] && [ -z "$ZSH_VERSION" ]; then
+    if [ -f "$HOME/.ssh-agent-init.sh" ]; then
+        . "$HOME/.ssh-agent-init.sh"
+    fi
 fi
 PROFILE_EOF
             echo "✓ Added to ~/.profile"

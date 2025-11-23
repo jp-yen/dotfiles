@@ -1,0 +1,7 @@
+# /etc/zsh/zshrc.d/ 内のファイルを読み込む
+if [ -d /etc/zsh/zshrc.d ]; then
+    for file in /etc/zsh/zshrc.d/*.zsh; do
+        [ -r "$file" ] && source "$file"
+    done
+    unset file
+fi
