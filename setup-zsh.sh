@@ -333,7 +333,13 @@ SAVEHIST=10000
 [[ -d "\$HOME/.zsh" ]] || mkdir -p "\$HOME/.zsh"
 
 export SCREENDIR="\$HOME/.screen"
-[[ -d "\$SCREENDIR" ]] || mkdir -p "\$SCREENDIR"
+if [[ ! -d "\$SCREENDIR" ]]; then
+    mkdir -p "\$SCREENDIR"
+    chmod 700 "\$SCREENDIR"
+fi
+
+# パスの重複削除
+typeset -U path
 
 setopt SHARE_HISTORY
 setopt HIST_IGNORE_DUPS
@@ -405,6 +411,23 @@ fi
 EOF
         chmod 644 /etc/zsh/zshrc
         echo "✓ /etc/zsh/zshrc を更新しました"
+    fi
+}
+
+# SSH Agent 初期化スクリプトのインストール
+install_ssh_agent_script() {
+    local SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local SSH_AGENT_SETUP="$SCRIPT_DIR/ssh-agent-setup.sh"
+    
+    if [ -f "$SSH_AGENT_SETUP" ]; then
+        echo "SSH Agent 初期化スクリプトをインストールしています..."
+        bash "$SSH_AGENT_SETUP"
+        echo ""
+    else
+        echo "警告: ssh-agent-setup.sh が見つかりません"
+        echo "      $SSH_AGENT_SETUP"
+        echo "      SSH Agent 自動起動の設定をスキップします"
+        echo ""
     fi
 }
 
@@ -489,6 +512,11 @@ fi
 
 # カスタム関数の読み込み
 [[ -f ~/.zsh/functions.zsh ]] && source ~/.zsh/functions.zsh
+
+# SSH Agent 初期化
+if [ -f /etc/ssh-agent-init.sh ]; then
+    . /etc/ssh-agent-init.sh
+fi
 ZSHRC_EOF
     echo "✓ .zshrc を作成しました"
     echo ""
@@ -542,9 +570,9 @@ if [ ! -f "$USER_HOME/.p10k.zsh" ]; then
     echo "2. 初回起動時にPowerlevel10k設定ウィザードが自動的に開始されます"
     echo "3. 設定後は以下を実行してカスタム設定を適用:"
     echo "   source ~/.p10k-post.zsh && p10k reload"
-    echo "   または 'exec zsh' で再起動"
+    echo "   または 'exec zsh' で起動"
 else
-    echo "zshを再起動してください:"
+    echo "zshを起動してください:"
     echo "  exec zsh"
 fi
 
@@ -626,6 +654,9 @@ main() {
     create_system_config
     echo "✓ システム設定ファイルの作成が完了しました"
     echo ""
+    
+    # SSH Agent 初期化スクリプトのインストール
+    install_ssh_agent_script
     
     # ヘルパー関数のインストール
     install_helper_functions

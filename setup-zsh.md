@@ -34,6 +34,23 @@ setup-my-zsh
 chsh -s $(which zsh)
 ```
 
+## SSH Agent 自動起動について
+
+`setup-zsh.sh` は、SSH Agent の自動起動設定も同時にインストールします。
+
+**インストールされるもの:**
+- `/etc/ssh-agent-init.sh` - SSH Agent 初期化スクリプト
+- 各シェル用の自動読み込み設定
+
+**動作:**
+- ログイン時に自動的に ssh-agent が起動します
+- 既に起動している場合は、既存のエージェントを再利用します
+- SSH 鍵が未登録の場合、`ssh-add` が自動実行されます
+
+**個別インストール:**
+ssh-agent の設定だけを個別にインストールしたい場合は、`ssh-agent-setup.sh` を使用してください。
+詳細は [ssh-agent.md](ssh-agent.md) を参照してください。
+
 ## メンテナンス
 
 ### 共有コンポーネントの更新（管理者）

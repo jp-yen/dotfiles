@@ -117,17 +117,12 @@ if ( $?prompt ) then
 	unset esc
 	unset clr
 
-	if ( ! -e ~/.ssh-agent ) then
-		( which \ssh-agent  >& /dev/null ) &&   `which ssh-agent` -c > ~/.ssh-agent
-	endif
-	source ~/.ssh-agent
-
-	if ( "$SSH_AGENT_PID" == "" || ! { kill -0 "$SSH_AGENT_PID" } ) then
-		( which \ssh-agent  >& /dev/null ) &&   `which ssh-agent` -c > ~/.ssh-agent
-		source ~/.ssh-agent
+	# SSH Agent 初期化
+	if ( -f /etc/ssh-agent-init.sh ) then
+		sh /etc/ssh-agent-init.sh
+		if ( -f ~/.ssh-agent.csh ) source ~/.ssh-agent.csh
 	endif
 
-	ssh-add -l >& /dev/null || ssh-add
 
 	( which \fortune >& /dev/null ) && fortune -a
 endif
