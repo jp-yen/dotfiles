@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # SSH Agent Setup Script with Auto-configuration
 
 # スクリプト本体
@@ -43,7 +43,7 @@ fi
 '
 
 # rootで実行されているか確認
-if [ "$(id -u)" -eq 0 ]; then
+if [ "$(id -u 2>/dev/null || echo -1)" -eq 0 ]; then
     echo "Running as root. Installing system-wide configuration..."
 
     # /etc/ssh-agent-init.sh として保存

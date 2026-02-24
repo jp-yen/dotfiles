@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # エラー時に停止
 set -e
@@ -64,7 +64,7 @@ install_packages() {
             ;;
         apt)
             apt update
-            apt install -y zsh git curl fzf
+            apt install -y zsh git curl fzf || echo "/etc/apk/repositories のcommunity を有効にしてください"
             ;;
         apk)
             apk add --no-cache zsh git curl fzf
@@ -197,7 +197,7 @@ EOF
 create_system_config() {
     # 設定パスを定義
     CONFIG_DIR="/etc/zsh/zshrc.d"
-    SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/zsh/system/zshrc.d"
+    SOURCE_DIR="$(cd "$(dirname "$0")" && pwd)/zsh/system/zshrc.d"
     
     echo "システム設定ファイルを作成しています..."
     
@@ -229,12 +229,12 @@ create_system_config() {
 
 # SSH Agent 初期化スクリプトのインストール
 install_ssh_agent_script() {
-    local SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
     local SSH_AGENT_SETUP="$SCRIPT_DIR/ssh-agent-setup.sh"
     
     if [ -f "$SSH_AGENT_SETUP" ]; then
         echo "SSH Agent 初期化スクリプトをインストールしています..."
-        bash "$SSH_AGENT_SETUP"
+        sh "$SSH_AGENT_SETUP"
         echo ""
     else
         echo "警告: ssh-agent-setup.sh が見つかりません"
@@ -248,7 +248,7 @@ install_ssh_agent_script() {
 install_helper_functions() {
     local HELPER_SCRIPT="/usr/local/bin/setup-my-zsh"
     local UPDATE_SCRIPT="/usr/local/bin/update-zsh-shared"
-    local SOURCE_BIN="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/zsh/bin"
+    local SOURCE_BIN="$(cd "$(dirname "$0")" && pwd)/zsh/bin"
     
     if [ ! -d "$SOURCE_BIN" ]; then
         echo "エラー: バイナリディレクトリが見つかりません: $SOURCE_BIN"
@@ -268,7 +268,7 @@ install_helper_functions() {
 # メイン処理
 main() {
     # root権限チェック
-    if [ "$EUID" -ne 0 ]; then
+    if [ "$(id -u)" -ne 0 ]; then
         echo "エラー: このスクリプトはroot権限で実行する必要があります"
         echo "sudo $0 を使用してください"
         exit 1
