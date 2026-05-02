@@ -69,24 +69,19 @@ exit
 # CD インストール net-inst を使うと /etc/apt/sources.list が自動的に更新され便利
 # (Cinnamon), SSH, 標準システムユーティリティ
 #
-# /etc/apt/sources.list の例
-#deb cdrom:[Debian GNU/Linux 12.9.0 _Bookworm_ - Official amd64 NETINST with firmware 20250111-10:54]/ bookworm contrib main non-free-firmware
-deb http://ftp.jaist.ac.jp/debian/ bookworm main non-free-firmware non-free contrib
-deb-src http://ftp.jaist.ac.jp/debian/ bookworm main non-free-firmware non-free contrib
+# /etc/apt/sources.list の例 https://www.debian.or.jp/using/mirror.html のサンプルを参照
 
-deb http://security.debian.org/debian-security bookworm-security main
-deb-src http://security.debian.org/debian-security bookworm-security main
+# See sources.list(5) for more information, especially
+# Remember that you can only use http, ftp or file URIs
+# CDROMs are managed through the apt-cdrom tool.
+deb http://cdn.debian.or.jp/debian trixie main contrib non-free non-free-firmware
 
-# bookworm-updates, to get updates before a point release is made;
-# see https://www.debian.org/doc/manuals/debian-reference/ch02.en.html#_updates_and_backports
-deb http://ftp.jaist.ac.jp/debian/ bookworm-updates main non-free-firmware non-free contrib
-deb-src http://ftp.jaist.ac.jp/debian/ bookworm-updates main non-free-firmware non-free contrib
+deb http://security.debian.org/debian-security trixie-security main contrib non-free non-free-firmware
 
-# This system was installed using small removable media
-# (e.g. netinst, live or single CD). The matching "deb cdrom"
-# entries were disabled at the end of the installation process.
-# For information about how to configure apt package sources,
-# see the sources.list(5) manual.
+# Uncomment if you want to use Debian stable-updates
+deb http://cdn.debian.or.jp/debian trixie-updates trixie-backports main contrib non-free non-free-firmware
 
-deb http://deb.debian.org/debian/ bookworm main contrib non-free contrib
-deb http://deb.debian.org/debian/ bookworm-backports main contrib non-free contrib
+# Uncomment if you want the apt-get source function to work
+#deb-src http://cdn.debian.or.jp/debian trixie main contrib non-free non-free-firmware
+#deb-src http://cdn.debian.or.jp/debian trixie-updates main contrib non-free non-free-firmware
+
