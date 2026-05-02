@@ -1,0 +1,11 @@
+# これを読み込ませるために /etc/inputrc の最後に以下を追加する
+# $include /etc/inputrc.local
+
+# echo '$include /etc/inputrc.local' >> /etc/inputrc
+
+# for bash
+# 入力済みの文字でコマンド履歴を前方一致検索する設定
+# [Ctrl]+[P] で過去へ、[Ctrl]+[N] で未来方向へ検索
+"\C-p": history-search-backward
+"\C-n": history-search-forward
+
