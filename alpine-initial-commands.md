@@ -49,10 +49,12 @@ setup-alpine
 btrfs にするならディスクを選択するところで Ctrl+C で止める。
 
 
-## インストールに必要なパッケージの追加
+## btrfs ディスクにする場合
+インストールに必要なパッケージの追加
 ```shell
 apk update
 apk add parted dosfstools btrfs-progs
+modprobe btrfs
 ```
 
 ## パーティションを作成
@@ -73,6 +75,162 @@ mkpart primary btrfs 513MiB 100%
 print
 quit
 ```
+
+### sda の場合の実行例
+```
+alpine:~# modprobe btrfs
+alpine:~# 
+alpine:~# parted /dev/sda
+GNU Parted 3.6
+Using /dev/sda
+Welcome to GNU Parted! Type 'help' to view a list of commands.
+
+--- 現在の状態を表示
+(parted) p
+Model: QEMU QEMU HARDDISK (scsi)
+Disk /dev/sda: 215GB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Disk Flags:
+
+Number  Start   End     Size    File system     Name  Flags
+ 1      1049kB  538MB   537MB   fat32                 boot, esp  👈 この Start, End を使う
+ 2      538MB   4833MB  4295MB  linux-swap(v1)        swap
+ 3      4833MB  215GB   210GB   ext4
+
+--- gpt モードで初期化
+(parted) mklabel gpt
+Warning: The existing disk label on /dev/sda will be destroyed and all data on this disk will be lost. Do you want to continue?
+Yes/No? y
+
+--- パーティションを表示
+(parted) p free
+Model: QEMU QEMU HARDDISK (scsi)
+Disk /dev/sda: 215GB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Disk Flags:
+
+Number  Start   End    Size   File system  Name  Flags
+        17.4kB  215GB  215GB  Free Space
+
+(parted) mkpart ESP fat32 1049kB  538MB  👈 先ほどの Start, End を使う
+(parted) set 1 esp on
+(parted)
+
+--- パーティションを表示
+(parted) p free
+Model: QEMU QEMU HARDDISK (scsi)
+Disk /dev/sda: 215GB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Disk Flags:
+
+Number  Start   End     Size    File system  Name  Flags
+        17.4kB  1049kB  1031kB  Free Space
+ 1      1049kB  538MB   537MB   fat32        ESP   boot, esp
+        538MB   215GB   214GB   Free Space
+
+--- swap を作成 (開始と終了位置)
+(parted) mkpart linux-swap 538MB 4634MB
+(parted)
+(parted) p free
+Model: QEMU QEMU HARDDISK (scsi)
+Disk /dev/sda: 215GB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Disk Flags:
+
+Number  Start   End     Size    File system  Name        Flags
+        17.4kB  1049kB  1031kB  Free Space
+ 1      1049kB  538MB   537MB   fat32        ESP         boot, esp
+ 2      538MB   4634MB  4096MB               linux-swap
+        4634MB  215GB   210GB   Free Space
+
+(parted) mkpart primary btrfs 4635MB 100%
+(parted)
+(parted) p
+Model: QEMU QEMU HARDDISK (scsi)
+Disk /dev/sda: 215GB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Disk Flags:
+
+Number  Start   End     Size    File system     Name     Flags
+ 1      1049kB  538MB   537MB   fat32           ESP      boot, esp
+ 2      538MB   4634MB  4096MB  linux-swap(v1)           swap
+ 3      4635MB  215GB   210GB   btrfs           primary
+
+(parted) q
+Information: You may need to update /etc/fstab.
+
+alpine:~#
+alpine:~# mkfs.fat -F 32 /dev/sda1
+mkfs.fat 4.2 (2021-01-31)
+alpine:~#
+alpine:~# mkswap /dev/sda2
+Setting up swapspace version 1, size = 4095733760 bytes
+UUID=13cb038a-bedf-4971-b597-a9a4ef7d96bc
+alpine:~# swapon /dev/sda2
+alpine:~#
+alpine:~# mount /dev/sda3 /mnt
+mount: mounting /dev/sda3 on /mnt failed: Invalid argument
+alpine:~# mkfs.btrfs -f /dev/sda3
+btrfs-progs v6.17.1
+See https://btrfs.readthedocs.io for more information.
+
+Performing full device TRIM /dev/sda3 (195.68GiB) ...
+Label:              (null)
+UUID:               fdcf1d07-23ec-4c58-b520-9d82038beecd
+Node size:          16384
+Sector size:        4096        (CPU page size: 4096)
+Filesystem size:    195.68GiB
+Block group profiles:
+  Data:             single            8.00MiB
+  Metadata:         DUP               1.00GiB
+  System:           DUP               8.00MiB
+SSD detected:       yes
+Zoned device:       no
+Features:           extref, skinny-metadata, no-holes, free-space-tree
+Checksum:           crc32c
+Number of devices:  1
+Devices:
+   ID        SIZE  PATH
+    1   195.68GiB  /dev/sda3
+
+alpine:~#
+alpine:~# mount /dev/sda3 /mnt
+alpine:~# mkdir /mnt/boot
+alpine:~# mount /dev/sda1 /mnt/boot
+alpine:~#
+alpine:~# setup-disk -m sys /mnt
+Installing system on /dev/sda3:
+Installing for x86_64-efi platform.
+Installation finished. No error reported.
+* creating /boot/initramfs-virt for 6.18.26-0-virt
+* Generating grub configuration file ...
+* Found linux image: /boot/vmlinuz-virt
+* Found initrd image: /boot/initramfs-virt
+* Warning: os-prober will not be executed to detect other bootable partitions.
+* Systems on them will not be added to the GRUB boot configuration.
+* Check GRUB_DISABLE_OS_PROBER documentation entry.
+* Adding boot menu entry for UEFI Firmware Settings ...
+* done
+alpine:~#
+alpine:~# blkid /dev/sda2
+/dev/sda2: UUID="13cb038a-bedf-4971-b597-a9a4ef7d96bc" TYPE="swap"
+alpine:~#
+alpine:~# reboot
+```
+`/etc/fstab` に swap を定義する...のはあとで。
+
+```
+UUID=13cb038a-bedf-4971-b597-a9a4ef7d96bc none swap sw 0 0
+```
+という感じで設定する。(ダブルクォートは含めないこと)
+`free -h` でマウントされたことを確認。
+
+
 
 ## フォーマット
 ### EFIパーティション
@@ -122,11 +280,13 @@ setup-alpine
 ```
 alpine:~# cat /etc/apk/repositories
 #/media/cdrom/apks
-http://ftp.udx.icscoe.jp/Linux/alpine/v3.22/main
-# http://ftp.udx.icscoe.jp/Linux/alpine/community
+http://ftp.udx.icscoe.jp/Linux/alpine/v3.23/main
+# http://ftp.udx.icscoe.jp/Linux/alpine/v3.23/community	👈 コメントアウトする
 
-http://ftp.yz.yamagata-u.ac.jp/pub/linux/alpine/v3.22/main
-http://ftp.yz.yamagata-u.ac.jp/pub/linux/alpine/v3.22/community
+http://dl-cdn.alpinelinux.org/alpine/edge/testing	👈 追加する
+
+http://ftp.yz.yamagata-u.ac.jp/pub/linux/alpine/v3.23/main
+http://ftp.yz.yamagata-u.ac.jp/pub/linux/alpine/v3.23/community
 alpine:~#
 ```
 
@@ -155,6 +315,9 @@ apk add openssh-client openssh-server
 
 # マニュアル
 apk add mandoc man-pages
+
+# vipw chsh コマンドなど
+apk add shadow
 ```
 
 ```
@@ -169,14 +332,9 @@ apk add busybox-extras netcat-openbsd
 ```
 
 ```
-# tcpdump（パケットキャプチャ）
-apk add tcpdump
+# tcpdump（パケットキャプチャ） tshark（WiresharkのCLI版） ngrep（パケット内容をgrepで検索）
+apk add tcpdump tshark ngrep
 
-# tshark（WiresharkのCLI版）
-apk add tshark
-
-# ngrep（パケット内容をgrepで検索）
-apk add ngrep
 ```
 
 ```
@@ -296,6 +454,15 @@ iface eth1 inet static
 rc-service networking restart
 ```
 
+# gettyの停止
+`tty1` と`ttyS0`だけにする
+```
+vi /etc/inittab
+```
+## 設定の反映
+```
+kill -HUP 1
+```
 
 # EVE-NG テンプレートへ反映 (commit)
 ```
@@ -325,8 +492,12 @@ drwxr-xr-x 51 root root      4096 Oct 13 09:41 ..
 -rw-r--r--  1 root root  68157440 Oct 13 09:41 cdrom.iso
 -rw-r--r--  1 root root 736886784 Oct 13 22:09 virtioa.qcow2
 root@eve-ng:/opt/unetlab/addons/qemu/linux-alpine-virt-3.22.2# rm cdrom.iso
-root@eve-ng:/opt/unetlab/addons/qemu/linux-alpine-virt-3.22.2# mv virtioa.qcow2 virtioa.qcow2.old
+--- ディスクを圧縮
+root@eve-ng:/opt/unetlab/addons/qemu/linux-alpine-virt-3.22.2# cp virtioa.qcow2 virtioa.qcow2.old
+root@eve-ng:/opt/unetlab/addons/qemu/linux-alpine-virt-3.22.2# /usr/bin/virt-sparsify --compress virtioa.qcow2 compressedvirtioa.qcow2 ; ls -lh ; mv compressedvirtioa.qcow2 virtioa.qcow2
+root@eve-ng:/opt/unetlab/addons/qemu/linux-alpine-virt-3.22.2# /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
 ```
+
 
 
 # Web サーバー
@@ -355,9 +526,10 @@ python3 -m http.server 8080 --directory /var/www
 
 # すべてのインターフェースで待ち受け
 python3 -m http.server 8000 --bind 0.0.0.0
+
 ```
 
-## 高速版
+## 高速版 (h2o)
 
 ### ビルド
 ```
@@ -453,7 +625,7 @@ max-connections: 10000
 EOF
 ```
 
-#### ダミードキュメント
+### ダミードキュメント
 ```
 # ドキュメントルート作成
 mkdir -p /var/www
@@ -469,7 +641,7 @@ dd if=/dev/zero of=/var/www/100mb.bin bs=1M count=100
 mkdir -p /var/log/h2o
 ```
 
-####  h2o 起動スクリプト
+###  h2o 起動スクリプト
 ```
 cat > /etc/init.d/h2o << 'EOF'
 #!/sbin/openrc-run
@@ -511,7 +683,7 @@ tail -f /var/log/h2o/error.log
 ```
 
 
-#### 接続試験
+### 接続試験
 curl や openssl を使用
 ```
 # HTTP/2 + TLS 1.3で接続
@@ -540,7 +712,7 @@ echo "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n" | \
 # Cipher    : TLS_AES_128_GCM_SHA256
 ```
 
-## システムチューニング
+## カーネルチューニング
 ```
 # カーネルパラメータ調整
 cat >> /etc/sysctl.conf << 'EOF'
@@ -572,3 +744,92 @@ sysctl -p
 ulimit -n 100000
 
 ```
+
+
+# Network setup-scripts
+## ホスト名の設定
+```
+setup-hostname
+```
+
+## IPアドレスの設定
+```
+setup-interfaces
+```
+
+## DNSの設定
+```
+setup-dns
+```
+
+## proxyの設定
+```
+setup-proxy
+```
+
+## NTPの起動
+```
+setup-ntp
+```
+
+### ntp の設定ファイル
+```
+alpine:~# cat /etc/conf.d/ntpd
+NTPD_OPTS="-N -p 192.168.0.252 -p 192.168.0.254 -p 192.168.0.251"
+alpine:~#
+```
+
+### ntp の状態確認
+`ntpq -p` や `chronyc sources` のようなコマンドはないのでログから確認する。問題があれば何か出力があるが、問題がなければログは出ない。
+```
+grep ntpd /var/log/messages
+```
+
+# アイコン
+[Alpine Linux Icon \| Dashboard Icons](https://dashboardicons.com/icons/alpine-linux)
+
+# docker, docker compose を追加する
+
+```
+apk add docker docker-compose
+```
+
+docker グループにユーザーを追加
+sudo usermod -aG docker $USER
+
+## 自動起動の設定
+```
+rc-update add docker boot
+```
+
+## 起動する
+```
+service docker start
+```
+
+```
+❯ docker run --rm chuanwen/cowsay
+Unable to find image 'chuanwen/cowsay:latest' locally
+latest: Pulling from chuanwen/cowsay
+c337767f8c73: Pull complete
+99ad4e3ced4d: Pull complete
+ec5a723f4e2a: Pull complete
+2a175e11567c: Pull complete
+8d26426e95e0: Pull complete
+46e451596b7c: Pull complete
+Digest: sha256:1f7a652a47fe7311c7e201644d44682e11e7ae4d3d7b03c1ce5c0df164de205c
+Status: Downloaded newer image for chuanwen/cowsay:latest
+ ______________________________________
+/ The solution of problems is the most \
+| characteristic and peculiar sort of  |
+| voluntary thinking.                  |
+|                                      |
+\ -- William James                     /
+ --------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+```
+
