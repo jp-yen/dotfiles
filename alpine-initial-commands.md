@@ -45,7 +45,7 @@ setup-alpine を実行してネットワークを接続 (必要に応じて prox
 ```shell
 setup-alpine
 ```
-btrfs を使用しないなら最後まで実行し、reboot。
+**btrfs を使用しない**なら最後まで実行し、reboot。
 btrfs にするならディスクを選択するところで Ctrl+C で止める。
 
 
@@ -164,9 +164,6 @@ apk add iputils iproute2 net-tools mtr
 # DNS診断
 apk add bind-tools drill
 
-# HTTPクライアント
-apk add curl wget
-
 # Telnet/Netcat
 apk add busybox-extras netcat-openbsd
 ```
@@ -245,9 +242,48 @@ apk add git
 apk add bash bash-completion
 ```
 
+# dotfiles をインストール
+```
+git clone https://github.com/jp-yen/dotfiles.git
+
+echo '' >> /etc/inputrc
+echo '$include /etc/inputrc.local' >> /etc/inputrc
+install inputrc.local dotfiles/csh.cshrc dotfiles/screenrc /etc/
+
+VIM_COLORS=/usr/share/vim/vim92/colors/
+( cd $VIM_COLORS && wget -N https://raw.githubusercontent.com/michalbachowski/vim-wombat256mod/master/colors/wombat256mod.vim )
+( cd $VIM_COLORS && wget -N https://raw.githubusercontent.com/romainl/Apprentice/master/colors/apprentice.vim )
+( cd $VIM_COLORS && wget -N https://raw.githubusercontent.com/karoliskoncevicius/moonshine-vim/master/colors/moonshine.vim )
+( cd $VIM_COLORS && wget -N https://raw.githubusercontent.com/Haron-Prime/Antares/master/colors/antares.vim )
+```
+
+
+# QEMU エージェントをインストール (EVE-NG, proxmox など)
+qemu-guest-agent : 実行ファイル本体
+qemu-guest-agent-openrc : サービス化用 rc ファイル
+```
+apk add qemu-guest-agent qemu-guest-agent-openrc
+
+# サービスを自動起動
+rc-update add qemu-guest-agent default
+
+# ステータスを確認
+rc-service qemu-guest-agent status
+
+# 起動
+rc-service qemu-guest-agent start
+```
+
+## サービスを削除 (自動起動しない)
+# rc-update del qemu-guest-agent default
+
 
 # IPアドレスの固定
 ```
+setup-interfaces
+---
+/etc/network/interfaces
+
 auto eth1
 iface eth1 inet static
     address 192.168.0.84/24
@@ -261,10 +297,9 @@ rc-service networking restart
 ```
 
 
-
-# commit
+# EVE-NG テンプレートへ反映 (commit)
 ```
-cd cd /opt/unetlab/tmp/<POD Nr>/<Lab UUID>/<Node ID>/
+cd /opt/unetlab/tmp/<POD Nr>/<Lab UUID>/<Node ID>/
 
 (例)
 cd /opt/unetlab/tmp/0/539beccd-03dd-4cb4-8829-9f096f3f81e2/4
@@ -291,9 +326,7 @@ drwxr-xr-x 51 root root      4096 Oct 13 09:41 ..
 -rw-r--r--  1 root root 736886784 Oct 13 22:09 virtioa.qcow2
 root@eve-ng:/opt/unetlab/addons/qemu/linux-alpine-virt-3.22.2# rm cdrom.iso
 root@eve-ng:/opt/unetlab/addons/qemu/linux-alpine-virt-3.22.2# mv virtioa.qcow2 virtioa.qcow2.old
-
 ```
-
 
 
 # Web サーバー
@@ -322,7 +355,6 @@ python3 -m http.server 8080 --directory /var/www
 
 # すべてのインターフェースで待ち受け
 python3 -m http.server 8000 --bind 0.0.0.0
-
 ```
 
 ## 高速版

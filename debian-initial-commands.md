@@ -35,7 +35,7 @@ git clone https://github.com/jp-yen/dotfiles.git
 
 echo '' >> /etc/inputrc
 echo '$include /etc/inputrc.local' >> /etc/inputrc
-install inputrc.local dotfiles/csh.cshrc dotfiles/screenrc /etc/
+install dotfiles/inputrc.local dotfiles/csh.cshrc dotfiles/screenrc /etc/
 
 install dotfiles/vimrc /etc/vim/
 install dotfiles/screen.sh /etc/profile.d/
