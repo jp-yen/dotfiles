@@ -247,3 +247,5 @@ mousetrack off
 # 画面をクリアした際にバッファをターミナルに保持させる設定
 termcapinfo xterm* ti=\E[?47l:te=\E[?47h
 
+# bash のプロンプトを初期化
+unsetenv PS1
