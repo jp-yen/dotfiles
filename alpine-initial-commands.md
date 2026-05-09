@@ -407,6 +407,7 @@ git clone https://github.com/jp-yen/dotfiles.git
 echo '' >> /etc/inputrc
 echo '$include /etc/inputrc.local' >> /etc/inputrc
 install inputrc.local dotfiles/csh.cshrc dotfiles/screenrc /etc/
+install dotfiles/aliases.sh /etc/profile.d/
 
 VIM_COLORS=/usr/share/vim/vim92/colors/
 ( cd $VIM_COLORS && wget -N https://raw.githubusercontent.com/michalbachowski/vim-wombat256mod/master/colors/wombat256mod.vim )

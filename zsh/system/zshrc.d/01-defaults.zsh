@@ -54,7 +54,7 @@ else
 fi
 
 # ロケール変更用エイリアス
-alias C='export LANG=C'
+alias C='unset LANG LC_ALL'
 alias JP='export LANG=ja_JP.UTF-8'
 
 # ディストリビューション固有のエイリアスと設定
