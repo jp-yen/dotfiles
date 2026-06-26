@@ -1,6 +1,7 @@
 #!/bin/sh
 # エラー時に停止
 set -e
+export LANG=C
 
 echo "=========================================="
 echo " Oh My Zsh 統合セットアップスクリプト"
@@ -38,11 +39,14 @@ detect_distribution() {
                 PKG_MANAGER="apk"
                 ;;
             *)
-                # ID_LIKE をチェック
-                if echo "$ID_LIKE" | grep -q "rhel\|fedora"; then
+                # ID_LIKE が無い場合や判定できない場合 Debian へフォールバック
+                if [ -n "$ID_LIKE" ] && echo "$ID_LIKE" | grep -q "rhel\|fedora"; then
                     DISTRO_FAMILY="redhat"
                     PKG_MANAGER="dnf"
-                elif echo "$ID_LIKE" | grep -q "debian"; then
+                elif [ -n "$ID_LIKE" ] && echo "$ID_LIKE" | grep -q "debian"; then
+                    DISTRO_FAMILY="debian"
+                    PKG_MANAGER="apt"
+                elif [ "$ID" = "debian" ]; then
                     DISTRO_FAMILY="debian"
                     PKG_MANAGER="apt"
                 else
@@ -70,11 +74,9 @@ install_packages() {
         pacman)
             pacman -Sy --noconfirm zsh git curl
 
-            # MSYS2では環境ごとにfzfのパッケージ名が異なるため、自動解決してインストール
             if [ -n "$MINGW_PACKAGE_PREFIX" ]; then
                 FZF_PKG="${MINGW_PACKAGE_PREFIX}-fzf"
                 echo "$FZF_PKG (fzf) をインストールしています..."
-                # 万が一失敗してもスクリプト全体を止めない
                 pacman -S --noconfirm "$FZF_PKG" || echo "警告: $FZF_PKG のインストールをスキップしました"
             else
                 echo "警告: fzf のパッケージ名が特定できないためスキップしました"
@@ -84,8 +86,8 @@ install_packages() {
             dnf install -y zsh git curl fzf
             ;;
         apt)
-            apt update
-            apt install -y zsh git curl fzf || echo "/etc/apk/repositories のcommunity を有効にしてください"
+            apt update || echo "Warning: apt update failed, continuing..."
+            apt install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" zsh git curl fzf || echo "Warning: apt install failed for some packages."
             ;;
         apk)
             apk add --no-cache zsh git curl fzf
@@ -105,7 +107,7 @@ install_oh_my_zsh() {
     else
         echo "Oh My Zshをシステム全体にインストールしています..."
         mkdir -p /usr/share
-        git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$ZSH_DIR"
+        git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$ZSH_DIR" || { echo "エラー: Oh My Zshのクローンに失敗しました"; return; }
         echo "✓ Oh My Zshのインストールが完了しました"
     fi
     echo ""
@@ -115,34 +117,29 @@ install_oh_my_zsh() {
 install_plugins() {
     local ZSH_CUSTOM="/usr/share/oh-my-zsh/custom"
 
+    # ZSH_CUSTOM ディレクトリが存在しない場合は作成
+    mkdir -p "$ZSH_CUSTOM/plugins"
+
     echo "Oh My Zshプラグインをインストールしています..."
 
     if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
-        git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
+        git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions" || echo "Warning: zsh-autosuggestions のクローンに失敗"
         echo "✓ zsh-autosuggestions をインストールしました"
-    else
-        echo "  zsh-autosuggestions は既にインストールされています"
     fi
 
     if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
-        git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+        git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" || echo "Warning: zsh-syntax-highlighting のクローンに失敗"
         echo "✓ zsh-syntax-highlighting をインストールしました"
-    else
-        echo "  zsh-syntax-highlighting は既にインストールされています"
     fi
 
     if [ ! -d "$ZSH_CUSTOM/plugins/zsh-completions" ]; then
-        git clone --depth=1 https://github.com/zsh-users/zsh-completions "$ZSH_CUSTOM/plugins/zsh-completions"
+        git clone --depth=1 https://github.com/zsh-users/zsh-completions "$ZSH_CUSTOM/plugins/zsh-completions" || echo "Warning: zsh-completions のクローンに失敗"
         echo "✓ zsh-completions をインストールしました"
-    else
-        echo "  zsh-completions は既にインストールされています"
     fi
 
     if [ ! -d "$ZSH_CUSTOM/plugins/fzf-tab" ]; then
-        git clone --depth=1 https://github.com/Aloxaf/fzf-tab "$ZSH_CUSTOM/plugins/fzf-tab"
+        git clone --depth=1 https://github.com/Aloxaf/fzf-tab "$ZSH_CUSTOM/plugins/fzf-tab" || echo "Warning: fzf-tab のクローンに失敗"
         echo "✓ fzf-tab をインストールしました"
-    else
-        echo "  fzf-tab は既にインストールされています"
     fi
 
     echo "✓ プラグインのインストールが完了しました"
@@ -154,9 +151,11 @@ install_powerlevel10k() {
     local ZSH_CUSTOM="/usr/share/oh-my-zsh/custom"
     local P10K_DIR="$ZSH_CUSTOM/themes/powerlevel10k"
 
+    mkdir -p "$ZSH_CUSTOM/themes"
+
     if [ ! -d "$P10K_DIR" ]; then
         echo "Powerlevel10kテーマをインストールしています..."
-        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
+        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR" || echo "Warning: Powerlevel10k のクローンに失敗"
         echo "✓ Powerlevel10kのインストールが完了しました"
     else
         echo "Powerlevel10kは既にインストールされています"
@@ -167,8 +166,7 @@ install_powerlevel10k() {
 # Fedora固有の設定
 configure_fedora_zshrc() {
     echo "Fedora固有の設定を適用しています..."
-
-    if [ -f /etc/zshrc ] && grep -q "/etc/zsh/zshrc.d" /etc/zshrc; then
+    if [ -f /etc/zshrc ] && grep -q "/etc/zsh/zshrc.d" /etc/zshrc 2>/dev/null; then
         echo "  /etc/zshrc は既に設定済みです"
     else
         cat >> /etc/zshrc << 'EOF'
@@ -194,7 +192,8 @@ configure_zshrc_loader() {
         mkdir -p /etc/zsh
     fi
 
-    if [ -f "$ZSHRC_SYS_PATH" ] && grep -q "/etc/zsh/zshrc.d" "$ZSHRC_SYS_PATH"; then
+    # ==== 修正6: grep 失敗による異常終了を回避 ====
+    if [ -f "$ZSHRC_SYS_PATH" ] && grep -q "/etc/zsh/zshrc.d" "$ZSHRC_SYS_PATH" 2>/dev/null; then
         echo "  $ZSHRC_SYS_PATH は既に設定済みです"
     else
         cat >> "$ZSHRC_SYS_PATH" << 'EOF'
@@ -245,7 +244,8 @@ install_ssh_agent_script() {
 
     if [ -f "$SSH_AGENT_SETUP" ]; then
         echo "SSH Agent 初期化スクリプトをインストールしています..."
-        sh "$SSH_AGENT_SETUP"
+        # sh がエラーを返しても止まらないようにする
+        sh "$SSH_AGENT_SETUP" || echo "Warning: ssh-agent-setup.sh failed."
         echo ""
     else
         echo "警告: ssh-agent-setup.sh が見つかりません"
