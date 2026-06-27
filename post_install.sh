@@ -4,6 +4,7 @@ export LANG=C
 
 exec > >(tee /var/log/post_install.log) 2>&1
 
+cd /root ; pwd
 env
 
 # SSH 設定 (インストール済みである前提)
