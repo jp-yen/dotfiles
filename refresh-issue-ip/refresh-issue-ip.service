@@ -1,0 +1,11 @@
+[Unit]
+Description=Update /etc/issue with current IP addresses
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/refresh-issue-ip.sh
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
