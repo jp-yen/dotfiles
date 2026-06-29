@@ -1,51 +1,31 @@
-set number
-
 " エラーでベルを鳴らさない
 set noerrorbells
 
 " 文字コード & 改行コード
 :set ts=4
-" 文字コードの自動認識
-if &encoding !=# 'utf-8'
-  set encoding=japan
-  set fileencoding=japan
-endif
+
+" 日本語文字コード自動認識設定
 if has('iconv')
+  " EUC/JISのバリエーション定義
   let s:enc_euc = 'euc-jp'
   let s:enc_jis = 'iso-2022-jp'
-  " iconvがeucJP-msに対応しているかをチェック
   if iconv("\x87\x64\x87\x6a", 'cp932', 'eucjp-ms') ==# "\xad\xc5\xad\xcb"
     let s:enc_euc = 'eucjp-ms'
     let s:enc_jis = 'iso-2022-jp-3'
-  " iconvがJISX0213に対応しているかをチェック
   elseif iconv("\x87\x64\x87\x6a", 'cp932', 'euc-jisx0213') ==# "\xad\xc5\xad\xcb"
     let s:enc_euc = 'euc-jisx0213'
     let s:enc_jis = 'iso-2022-jp-3'
   endif
-  " fileencodingsを構築
-  if &encoding ==# 'utf-8'
-    let s:fileencodings_default = &fileencodings
-    let &fileencodings = s:enc_jis .','. s:enc_euc .',cp932'
-    let &fileencodings = &fileencodings .','. s:fileencodings_default
-    unlet s:fileencodings_default
-  else
-    let &fileencodings = &fileencodings .','. s:enc_jis
-    set fileencodings+=utf-8,ucs-2le,ucs-2
-    if &encoding =~# '^\(euc-jp\|euc-jisx0213\|eucjp-ms\)$'
-      set fileencodings+=cp932
-      set fileencodings-=euc-jp
-      set fileencodings-=euc-jisx0213
-      set fileencodings-=eucjp-ms
-      let &fileencoding = s:enc_euc
-    else
-      let &fileencodings = &fileencodings .','. s:enc_euc
-    endif
-  endif
-  " 定数を処分
+
+  " utf-8 を先頭
+  " ※JISは誤認しないので utf-8 より前に
+  let &fileencodings = s:enc_jis . ',utf-8,' . s:enc_euc . ',cp932,ucs-bom,latin1'
+
   unlet s:enc_euc
   unlet s:enc_jis
 endif
-" 日本語を含まない場合は fileencoding に encoding を使うようにする
+
+" 日本語を含まない場合は fileencoding に encoding (utf-8) を使う
 if has('autocmd')
   function! AU_ReCheck_FENC()
     if &fileencoding =~# 'iso-2022-jp' && search("[^\x01-\x7e]", 'n') == 0
@@ -54,6 +34,7 @@ if has('autocmd')
   endfunction
   autocmd BufReadPost * call AU_ReCheck_FENC()
 endif
+
 " 改行コードの自動認識
 set fileformats=unix,dos,mac
 " □とか○の文字があってもカーソル位置がずれないようにする
@@ -75,7 +56,7 @@ map <LeftMouse> <Nop>
 autocmd VimEnter * set mouse=
 
 filetype on
-if has("audocmd")
+if has("autocmd")
     autocmd FileType c,cpp,perl setlocal cindent
     autocmd FileType python setlocal tabstop=4 noexpandtab smarttab=on
 endif
@@ -99,6 +80,7 @@ set showmatch
 "検索結果をハイライトする
 set hlsearch
 
+"-------Display-------
 "ルーラー,行番号を表示
 set ruler
 set number
@@ -109,6 +91,7 @@ set showcmd
 "ステータスラインを常に表示
 set laststatus=2
 
+"-------Display-------
 "ファイルナンバー表示
 "set statusline=[%n]
 
@@ -154,29 +137,29 @@ syntax enable
 " どれか入っていないかな？ ない場合は .vim/colors/ へ入れる
 
 " https://github.com/vim/vim/blob/master/runtime/colors/evening.vim :-P
-colorscheme evening
+silent! colorscheme evening
 
 " https://raw.githubusercontent.com/rodnaph/vim-color-schemes/master/colors/koehler.vim
-colorscheme koehler
+silent! colorscheme koehler
 
 " https://www.vim.org/scripts/script.php?script_id=2465
 " wget -O wombat256mod.vim 'https://www.vim.org/scripts/download_script.php?src_id=13400'
-colorscheme wombat256mod
+silent! colorscheme wombat256mod
 
 " https://romainl.github.io/Apprentice/
 " wget https://raw.githubusercontent.com/romainl/Apprentice/master/colors/apprentice.vim
-colorscheme apprentice
+silent! colorscheme apprentice
 
 " https://github.com/karoliskoncevicius/moonshine-vim
 " wget https://raw.githubusercontent.com/karoliskoncevicius/moonshine-vim/master/colors/moonshine.vim
-colorscheme moonshine
+silent! colorscheme moonshine
 
 " https://github.com/Haron-Prime/Antares
 " wget https://raw.githubusercontent.com/Haron-Prime/Antares/master/colors/antares.vim
-colorscheme antares
+silent! colorscheme antares
 
 " 自分でカラースキームを選びたい場合は
 " https://colorswat.ch/vim/?welcome=1
 
-"文字コードや改行コードが違っているとファイルを壊すので注意
-"vim: set ts=4 fenc=utf-8 ff=unix ft=vimrc : モードライン
+"文字コードや改行コードが違っているとファイルを壊すので注意 モードライン
+"vim: set ts=4 fenc=utf-8 ff=unix ft=vimrc :
