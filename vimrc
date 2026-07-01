@@ -58,7 +58,7 @@ autocmd VimEnter * set mouse=
 filetype on
 if has("autocmd")
     autocmd FileType c,cpp,perl setlocal cindent
-    autocmd FileType python setlocal tabstop=4 noexpandtab smarttab=on
+    autocmd FileType python setlocal tabstop=4 noexpandtab smarttab
 endif
 
 "-------Search--------
