@@ -1,6 +1,7 @@
 #!/bin/bash -x
 set -e
 export LANG=C
+export LC_ALL=C
 
 exec > >(tee /var/log/post_install.log) 2>&1
 
