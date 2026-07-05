@@ -8,5 +8,5 @@ alias C='unset LANG LC_ALL'
 
 alias ls='ls -F --color=tty'
 alias ll='ls -l --color=tty'
-alias screen ="/usr/bin/screen -U -D -RR"
+alias screen="/usr/bin/screen -U -D -RR"
 
