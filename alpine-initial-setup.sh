@@ -68,16 +68,20 @@ echo "--- visudo で sudoers を編集してください ---"
 # dotfiles のセットアップ
 ###############################################################################
 
-echo '' >> /etc/inputrc
-echo '$include /etc/inputrc.local' >> /etc/inputrc
-install dotfiles/inputrc.local dotfiles/csh.cshrc dotfiles/screenrc /etc/
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-install dotfiles/aliases.sh /etc/profile.d/
+if ! grep -q 'inputrc.local' /etc/inputrc 2>/dev/null; then
+  echo '' >> /etc/inputrc
+  echo '$include /etc/inputrc.local' >> /etc/inputrc
+fi
+install "$SCRIPT_DIR/inputrc.local" "$SCRIPT_DIR/csh.cshrc" "$SCRIPT_DIR/screenrc" /etc/
+
+install "$SCRIPT_DIR/aliases.sh" /etc/profile.d/
 
 # Alpine の vim 設定
 #   /etc/vim/vimrc.local として配置し、vimrc から読み込む
 mkdir -p /etc/vim
-install dotfiles/vimrc /etc/vim/vimrc.local
+install "$SCRIPT_DIR/vimrc" /etc/vim/vimrc.local
 VIMRC=/etc/vim/vimrc
 if [ ! -f "$VIMRC" ] || ! grep -q 'source /etc/vim/vimrc.local' "$VIMRC" 2>/dev/null; then
   echo 'source /etc/vim/vimrc.local' >> "$VIMRC"

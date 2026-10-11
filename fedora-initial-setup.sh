@@ -55,14 +55,18 @@ echo "--- visudo で sudoers を編集してください ---"
 
 # chsh -s /usr/bin/tcsh
 
-echo '' >> /etc/inputrc
-echo '$include /etc/inputrc.local' >> /etc/inputrc
-install dotfiles/inputrc.local dotfiles/csh.cshrc dotfiles/screenrc /etc/
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-install dotfiles/screen.sh dotfiles/aliases.sh /etc/profile.d/
+if ! grep -q 'inputrc.local' /etc/inputrc 2>/dev/null; then
+  echo '' >> /etc/inputrc
+  echo '$include /etc/inputrc.local' >> /etc/inputrc
+fi
+install "$SCRIPT_DIR/inputrc.local" "$SCRIPT_DIR/csh.cshrc" "$SCRIPT_DIR/screenrc" /etc/
+
+install "$SCRIPT_DIR/screen.sh" "$SCRIPT_DIR/aliases.sh" /etc/profile.d/
 
 # Fedora の vimrc 配置先
-install -D dotfiles/vimrc /etc/vimrc.local
+install -D "$SCRIPT_DIR/vimrc" /etc/vimrc.local
 if ! grep -q 'source /etc/vimrc.local' /etc/vimrc 2>/dev/null; then
   echo 'source /etc/vimrc.local' >> /etc/vimrc
 fi

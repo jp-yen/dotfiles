@@ -55,12 +55,16 @@ echo "--- visudo で sudoers を編集してください ---"
 
 # chsh -s /usr/bin/tcsh
 
-echo '' >> /etc/inputrc
-echo '$include /etc/inputrc.local' >> /etc/inputrc
-install dotfiles/inputrc.local dotfiles/csh.cshrc dotfiles/screenrc /etc/
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-install dotfiles/screen.sh dotfiles/aliases.sh /etc/profile.d/
-install dotfiles/vimrc /etc/vim/
+if ! grep -q 'inputrc.local' /etc/inputrc 2>/dev/null; then
+  echo '' >> /etc/inputrc
+  echo '$include /etc/inputrc.local' >> /etc/inputrc
+fi
+install "$SCRIPT_DIR/inputrc.local" "$SCRIPT_DIR/csh.cshrc" "$SCRIPT_DIR/screenrc" /etc/
+
+install "$SCRIPT_DIR/screen.sh" "$SCRIPT_DIR/aliases.sh" /etc/profile.d/
+install "$SCRIPT_DIR/vimrc" /etc/vim/
 
 # vim カラースキームのダウンロード
 VIM_COLORS=$(find /usr/share/vim -maxdepth 1 -type d -name 'vim*' | sort -V | tail -1)/colors
