@@ -99,13 +99,16 @@ mkdir -p "$VIM_COLORS"
 # パフォーマンスモニタ (sysstat)
 ###############################################################################
 
-apk add sysstat sysstat-openrc
+apk add sysstat
+
+# ログ保存用ディレクトリの作成
+mkdir -p /var/log/sa
 
 # 取得パラメータを指定:
 #   履歴を 200日分保存 (HISTORY=200)
 #   取得できるデータを全部取得 (-S XALL)
 #   ファイル名を saYYYYMMDD (-D)
-SYSSTAT_CONF=/etc/sysstat/sysstat
+SYSSTAT_CONF=/etc/sysconfig/sysstat
 if [ -f "$SYSSTAT_CONF" ]; then
   cp "$SYSSTAT_CONF" "${SYSSTAT_CONF}.orig"
   sed -i \
@@ -114,8 +117,19 @@ if [ -f "$SYSSTAT_CONF" ]; then
     "$SYSSTAT_CONF"
 fi
 
-rc-update add sysstat default
-rc-service sysstat start
+# cron による定期収集の設定 (10分毎に収集、毎日23:53に日次集計)
+CRONTAB=/etc/crontabs/root
+mkdir -p /etc/crontabs
+if [ ! -f "$CRONTAB" ] || ! grep -q '/usr/lib/sa/sa1' "$CRONTAB" 2>/dev/null; then
+  echo '*/10 * * * * /usr/lib/sa/sa1 1 1' >> "$CRONTAB"
+fi
+if [ ! -f "$CRONTAB" ] || ! grep -q '/usr/lib/sa/sa2' "$CRONTAB" 2>/dev/null; then
+  echo '53 23 * * * /usr/lib/sa/sa2 -A' >> "$CRONTAB"
+fi
+chmod 600 "$CRONTAB"
+
+rc-update add crond default 2>/dev/null || true
+rc-service crond start 2>/dev/null || true
 
 ###############################################################################
 # Proxmox / QEMU 環境の場合 (qemu-guest-agent)
