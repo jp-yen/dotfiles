@@ -1,29 +1,5 @@
-# デフォルトエイリアス
-alias ll='ls -alF --color=auto'
-alias la='ls -A --color=auto'
-alias l='ls -CF --color=auto'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias c='clear'
-
-(( $+commands[vim] )) && alias vi='vim'
-
-# less設定
-if (( $+commands[less] )); then
-    alias less='less -X'
-    export LESS='-ReFXsc'
-    export PAGER='less'
-    export SYSTEMD_LESS='RXK'
-
-    # lesspipe configuration
-    if (( $+commands[lesspipe] )); then
-        export LESSOPEN='| lesspipe %s'
-    elif (( $+commands[lesspipe.sh] )); then
-        export LESSOPEN='| lesspipe.sh %s'
-    fi
-elif (( $+commands[more] )); then
-    export PAGER='more'
-fi
+# 共通エイリアス・環境変数 (/etc/profile.d/aliases.sh) の読み込み
+[[ -r /etc/profile.d/aliases.sh ]] && source /etc/profile.d/aliases.sh
 
 # LESS_TERMCAP settings (man page colors)
 if command -v tput >/dev/null 2>&1; then
@@ -53,11 +29,7 @@ else
     export LESS_TERMCAP_zz=$'\e[0m'
 fi
 
-# ロケール変更用エイリアス
-alias C='unset LANG LC_ALL'
-alias JP='export LANG=ja_JP.UTF-8'
-
-# ディストリビューション固有のエイリアスと設定
+# ディストリビューション固有の fzf パス設定
 if [ -f /etc/os-release ]; then
     . /etc/os-release
     
@@ -79,28 +51,6 @@ if [ -f /etc/os-release ]; then
             elif [[ "$ID_LIKE" == *"debian"* ]]; then
                 DISTRO_FAMILY="debian"
             fi
-            ;;
-    esac
-
-    # エイリアス設定
-    case "$DISTRO_FAMILY" in
-        redhat)
-            alias update='sudo dnf update'
-            alias install='sudo dnf install'
-            alias remove='sudo dnf remove'
-            alias search='dnf search'
-            ;;
-        debian)
-            alias update='sudo apt update && sudo apt upgrade'
-            alias install='sudo apt install'
-            alias remove='sudo apt remove'
-            alias search='apt search'
-            ;;
-        alpine)
-            alias update='sudo apk update && sudo apk upgrade'
-            alias install='sudo apk add'
-            alias remove='sudo apk del'
-            alias search='apk search'
             ;;
     esac
 
@@ -126,12 +76,6 @@ SAVEHIST=10000
 
 [[ -d "$HOME/.zsh" ]] || mkdir -p "$HOME/.zsh"
 
-export SCREENDIR="$HOME/.screen"
-if [[ ! -d "$SCREENDIR" ]]; then
-    mkdir -p "$SCREENDIR"
-    chmod 700 "$SCREENDIR"
-fi
-
 # パスの重複削除
 typeset -U path
 
@@ -150,7 +94,3 @@ bindkey '^P' history-beginning-search-backward-end
 bindkey '^N' history-beginning-search-forward-end
 bindkey '^[[A' history-beginning-search-backward-end
 bindkey '^[[B' history-beginning-search-forward-end
-
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-fi
