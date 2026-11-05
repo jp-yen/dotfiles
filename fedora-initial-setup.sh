@@ -40,7 +40,7 @@ dnf -y install syslog-ng htop net-tools psmisc btrfs-progs
 
 # ネットワーク検証・調査ツール
 #   bind9-dnsutils → bind-utils, netcat-openbsd → nmap-ncat
-dnf -y install bind-utils wireshark-cli nmap-ncat fping traceroute nmap wget
+dnf -y install bind9-next-utils wireshark-cli nmap-ncat fping traceroute nmap wget
 
 ###############################################################################
 # sudoers の編集
